@@ -1,0 +1,4 @@
+streamlit
+ezdxf
+pyproj
+simplekml
