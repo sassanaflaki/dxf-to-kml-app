@@ -200,14 +200,12 @@ if uploaded:
             st.warning(f"Skipped {e.dxftype()} on layer {getattr(e.dxf, 'layer', '?')}: {ex}")
 
     # Write to memory and offer download
-    buf = io.BytesIO()
-    kml.save(buf)
-    buf.seek(0)
+    xml = kml.kml()
 
     st.success(f"KML created | points: {count['points']}  lines: {count['lines']}  polylines: {count['polylines']}  polygons: {count['polygons']}")
     st.download_button(
         label="Download KML",
-        data=buf.read(),
+        data=xml.encode("utf-8"),
         file_name="export.kml",
         mime="application/vnd.google-earth.kml+xml",
     )
