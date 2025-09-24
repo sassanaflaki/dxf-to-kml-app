@@ -1,9 +1,11 @@
 import io
 import math
+import tempfile
 from typing import List, Tuple
 
 import streamlit as st
 import ezdxf
+from ezdxf import recover
 from ezdxf.entities import Line, LWPolyline, Polyline, Point, Circle, Arc, Spline
 from pyproj import Transformer, CRS
 import simplekml
@@ -88,9 +90,14 @@ with st.sidebar:
 uploaded = st.file_uploader("Upload DXF", type=["dxf"]) 
 
 if uploaded:
-    # Read DXF
+    # Read DXF from UploadedFile by writing to a temp file, then using ezdxf.recover
     try:
-        doc = ezdxf.readfile(uploaded)
+        with tempfile.NamedTemporaryFile(suffix=".dxf", delete=True) as tmp:
+            tmp.write(uploaded.getbuffer())
+            tmp.flush()
+            doc, auditor = recover.readfile(tmp.name)
+        if auditor.has_errors:
+            st.warning(f"DXF recovered with {len(auditor.errors)} issue(s). Proceeding.")
         msp = doc.modelspace()
     except Exception as e:
         st.error(f"Failed to read DXF: {e}")
@@ -210,4 +217,3 @@ if uploaded:
 
 else:
     st.info("Upload a DXF to start.")
-
